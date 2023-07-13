@@ -1,0 +1,1065 @@
+
+<html>
+<!--15/01/2022 Release! Jonathan Cellucci-->
+<head>
+    <meta name="author" content="Jonathan Cellucci / JC studios">
+</head>
+
+<body>
+    <h1>J catch the flag!!!</h1>
+    <h1 id="My_name">By Jonathan Cellucci</h1>
+    
+    <input type="text" id="R_score_points" value="0" readonly>
+    <input type="text" id="B_score_points" value="0" readonly>
+    <canvas id="game"></canvas>
+    <script>
+
+
+        let canvas = document.getElementById("game");
+        let ctx = canvas.getContext("2d"); 
+
+        //canvas.width = window.innerWidth; 
+        //canvas.height = window.innerHeight; 
+
+        canvas.width = 1512;
+        canvas.height = 700;
+
+        const GAMEWIDTH = canvas.width;
+        const GAMEHEIGHT = canvas.height;
+
+        var Score_points_R = 0; 
+        var Score_points_B = 0; 
+
+        var unlock_time = true; 
+
+        var border_r = "black"; 
+        var border_b = "black"; 
+
+        class player {
+
+            constructor(gameWidth, gameHeight) {
+
+                this.width = 40;
+                this.height = 40;
+
+                this.width_f = 25; 
+                this.height_f = 25; 
+                
+                this.width_o1 = 100; 
+                this.height_o1 = 460; 
+
+                this.width_o2 = 100; 
+                this.height_o2 = 100; 
+
+                this.width_f_fs = this.width - this.width + 4;   
+                this.height_f_fs = 2 * this.height;  
+                
+                this.speed_r_x = 0;
+                this.maxs_r_x = 11;
+
+                this.speed_r_y = 0;
+                this.maxs_r_y = 11;
+
+                this.speed_b_x = 0;
+                this.maxs_b_x = 11;
+
+                this.speed_b_y = 0;
+                this.maxs_b_y = 11;   
+
+                this.speed_o2_u = 0;
+                this.maxs_o2_u = 5; 
+
+                this.speed_o2_d = 0;
+                this.maxs_o2_d = 5; 
+
+
+                this.p = {
+
+                    //Red player "position left"....................................
+
+                    x_r: gameWidth - gameWidth + 134 - this.width / 2,
+                    y_r: gameHeight / 2 - this.height / 2,
+
+                    //Blue player "position right"....................................
+
+                    x_b: gameWidth - 134 - this.width / 2,
+                    y_b: gameHeight / 2 - this.height / 2, 
+
+                    //Red flag "position left"....................................
+                    
+                    x_f_r: gameWidth - gameWidth + 30 + this.width_f / 2, 
+                    y_f_r: gameHeight / 2 - this.height / 2,
+                    
+                    //Blue flag "position right"....................................
+                     
+                    x_f_b:  gameWidth - 30 - this.width_f / 2, 
+                    y_f_b: gameHeight / 2 - this.height / 2, 
+
+                    block_x_r: gameWidth - gameWidth + 134 - this.width / 2,
+                    block_y_r: gameHeight / 2 - this.height / 2,
+
+                    block_x_b: gameWidth - 134 - this.width / 2,
+                    block_y_b: gameHeight / 2 - this.height / 2, 
+
+                    //obstacle 1 
+
+                    x_o1r: gameWidth / 4 - this.width_o1 / 2,
+                    y_o1r: gameHeight / 2 - this.height_o1 / 2,
+
+                    x_o1b: gameWidth - gameWidth / 4 - this.width_o1 / 2,
+                    y_o1b: gameHeight / 2 - this.height_o1 / 2, 
+
+                    //obstacle 2 
+
+                    x_o2u: gameWidth / 2 - this.width_o1 / 2,
+                    y_o2u: 0,  
+                    
+                    x_o2d: gameWidth - gameWidth / 2 - this.width_o2 / 2,
+                    y_o2d: gameHeight - this.height_o2, 
+
+                };
+            }
+
+            //Move the red player 
+
+            moveU_Red() {
+
+                this.speed_r_y = - this.maxs_r_y;
+
+            }
+
+            moveR_Red() {
+
+                this.speed_r_x = + this.maxs_r_x;
+
+            }
+
+            moveD_Red() {
+
+                this.speed_r_y = + this.maxs_r_y;
+
+            }
+
+            moveL_Red() {
+
+                this.speed_r_x = - this.maxs_r_x;
+
+            }
+
+            stop_r_x() {
+
+                this.speed_r_x = 0;
+
+            }
+
+            stop_r_y() {
+
+                this.speed_r_y = 0;
+
+            }
+
+            //Move the Blue player 
+
+            moveU_Blue() {
+
+                this.speed_b_y = - this.maxs_b_y;
+
+            }
+
+            moveR_Blue() {
+
+                this.speed_b_x = + this.maxs_b_x;
+
+            }
+
+            moveD_Blue() {
+
+                this.speed_b_y = + this.maxs_b_y;
+
+            }
+
+            moveL_Blue() {
+
+                this.speed_b_x = - this.maxs_b_x;
+
+            }
+
+            stop_b_x() {
+
+                this.speed_b_x = 0;
+
+            }
+
+            stop_b_y() {
+
+                this.speed_b_y = 0;
+
+            }
+
+            //Blocks the players........................................
+            
+            Block_P() {
+
+                    border_r = "grey"; 
+                    border_b = "grey"; 
+
+                    this.maxs_r_x = 0; 
+                    this.maxs_r_y = 0; 
+                    this.maxs_b_x = 0; 
+                    this.maxs_b_y = 0; 
+
+                    this.speed_r_x = 0; 
+                    this.speed_r_y = 0; 
+                    this.speed_b_x = 0; 
+                    this.speed_b_y = 0; 
+
+                    this.p.x_r = this.p.block_x_r; 
+                    this.p.y_r = this.p.block_y_r;
+                                
+                    this.p.x_b = this.p.block_x_b;
+                    this.p.y_b = this.p.block_y_b; 
+
+                    setTimeout(() => {
+                        
+                        Player.Block_P2(); 
+
+                    }, 20);
+
+                }
+                
+                Block_P2() {
+                    
+                    setTimeout(() => {
+                        
+                        Player.Unlock_P(); 
+
+                    }, 4500); 
+
+                }
+                
+                Unlock_P() {
+
+                    border_r = "black"; 
+                    border_b = "black";  
+
+                    this.maxs_r_x = 11; 
+                    this.maxs_r_y = 11; 
+                    this.maxs_b_x = 11; 
+                    this.maxs_b_y = 11; 
+
+            } 
+            
+            Block_P_r() {
+                
+                border_r = "grey"; 
+
+                this.maxs_r_x = 0; 
+                this.maxs_r_y = 0; 
+
+                this.speed_r_x = 0; 
+                this.speed_r_y = 0; 
+
+                this.p.x_r = this.p.block_x_r; 
+                this.p.y_r = this.p.block_y_r;
+                
+                setTimeout(() => {
+                        
+                        Player.Block_P_r2(); 
+
+                    }, 20);
+
+            }
+            
+            Block_P_r2() {
+                
+                setTimeout(() => {
+                        
+                        Player.Unlock_P_r(); 
+
+                    }, 4000);
+
+            }
+
+            Unlock_P_r() {
+                    
+                    border_r = "black"; 
+
+                    this.maxs_r_x = 11; 
+                    this.maxs_r_y = 11; 
+
+            } 
+
+            Block_P_b() {
+                
+                border_b = "grey"; 
+
+                this.maxs_b_x = 0; 
+                this.maxs_b_y = 0; 
+
+                this.speed_b_x = 0; 
+                this.speed_b_y = 0; 
+
+                this.p.x_b = this.p.block_x_b; 
+                this.p.y_b = this.p.block_y_b;
+                
+                setTimeout(() => {
+                        
+                        Player.Block_P_b2(); 
+
+                    }, 20);
+
+            }
+            
+            Block_P_b2() {
+                
+                setTimeout(() => {
+                        
+                        Player.Unlock_P_b(); 
+
+                    }, 4000);
+
+            }
+
+            Unlock_P_b() {
+                    
+                    border_b = "black"; 
+
+                    this.maxs_b_x = 11; 
+                    this.maxs_b_y = 11; 
+
+            }
+
+            Reload_The_Page() {
+                
+                setTimeout(() => {
+
+                    Player.Reload_The_Game_Page(); 
+
+                }, 20000); 
+
+            }
+
+            Reload_The_Game_Page() {
+                    
+                window.location.reload(); 
+
+            }
+
+            draw(ctx) {
+
+                //RED AREA 
+                ctx.fillStyle = "red";
+                ctx.fillRect(0, 0, GAMEWIDTH / 2, GAMEHEIGHT);
+
+                //Blue area 
+                ctx.fillStyle = "blue";
+                ctx.fillRect(GAMEWIDTH, 0, -GAMEWIDTH / 2, GAMEHEIGHT);
+
+                //RED 
+
+                //Red player 
+                ctx.fillStyle = "red";
+                ctx.fillRect(this.p.x_r, this.p.y_r, this.width, this.height);
+
+                //Red border 
+                ctx.strokeStyle = border_r; 
+                ctx.lineWidth = 3; 
+                ctx.strokeRect(this.p.x_r, this.p.y_r, this.width, this.height);
+
+                //BLUE 
+
+                //Blue player
+                ctx.fillStyle = "blue"; 
+                ctx.fillRect(this.p.x_b, this.p.y_b, this.width, this.height);
+
+                //Blue border 
+                ctx.lineWidth = 3; 
+                ctx.strokeStyle = border_b; 
+                ctx.strokeRect(this.p.x_b, this.p.y_b, this.width, this.height); 
+
+                //Red flag "but is blue"
+                //ctx.moveTo(this.p.x_f_r, this.p.y_f_r); 
+                //ctx.lineTo(this.p.x_f_r, this.p.y_f_r);  
+                ctx.lineWidth = 3; 
+                ctx.fillStyle = "blue"; 
+                ctx.strokeStyle = "black";  
+                ctx.fillRect(this.p.x_f_r, this.p.y_f_r - this.height, - this.width_f, this.height_f); 
+                ctx.strokeRect(this.p.x_f_r, this.p.y_f_r - this.height, - this.width_f, this.height_f); 
+                
+                //Red flagstaff 
+                ctx.fillStyle = "black";  
+                ctx.fillRect(this.p.x_f_r + 2, this.p.y_f_r - this.height, - this.width_f_fs, this.height_f_fs); 
+
+                //Blue flag "but is red"
+                //ctx.moveTo(this.p.x_f_r, this.p.y_f_r); 
+                //ctx.lineTo(this.p.x_f_r, this.p.y_f_r);  
+                ctx.lineWidth = 3; 
+                ctx.fillStyle = "red"; 
+                ctx.strokeStyle = "black";  
+                ctx.fillRect(this.p.x_f_b, this.p.y_f_b - this.height, this.width_f, this.height_f); 
+                ctx.strokeRect(this.p.x_f_b, this.p.y_f_b - this.height, this.width_f, this.height_f); 
+                
+                //Blue flagstaff 
+                ctx.fillStyle = "black";  
+                ctx.fillRect(this.p.x_f_b - 2, this.p.y_f_b - this.height, this.width_f_fs, this.height_f_fs); 
+                //invisible box used for grab the red flag "but is blue" from the blue player "I haven't made this"...
+                
+                //Obstacle 1 Red "position right and he goes up and down"........................ 
+                
+                ctx.fillStyle = "black"; 
+                ctx.fillRect(this.p.x_o1r, this.p.y_o1r, this.width_o1, this.height_o1); 
+
+                //Obstacle 1 Blue "position right and he goes up and down"........................ 
+                
+                ctx.fillStyle = "black"; 
+                ctx.fillRect(this.p.x_o1b, this.p.y_o1b, this.width_o1, this.height_o1); 
+
+                //Obstacle 2 Up........................ 
+                
+                ctx.fillStyle = "black"; 
+                ctx.fillRect(this.p.x_o2u, this.p.y_o2u, this.width_o2, this.height_o2); 
+                
+                //Obstacle 2 Down........................ 
+                
+                ctx.fillStyle = "black"; 
+                ctx.fillRect(this.p.x_o2d, this.p.y_o2d, this.width_o2, this.height_o2); 
+                
+                //If the Red player has won......
+
+                if(Score_points_R >= 10) {
+                    
+                    /*var gradient_text = ctx.createLinearGradient(0, 0, GAMEHEIGHT, 0); 
+                    
+                    gradient_text.addColorStop("1", "blue"); 
+                    gradient_text.addColorStop("1", "magenta"); 
+                    gradient_text.addColorStop("1", "red"); */
+                    
+                    //ctx.fillStyle = gradient_text; 
+                    ctx.font = "100px Verdana"; 
+                    ctx.fillStyle = "Blue"; 
+                    ctx.fillText("Player Red", GAMEWIDTH / 2 - 530 - 20, GAMEHEIGHT / 2); 
+                    ctx.fillStyle = "Red"; 
+                    ctx.fillText("has won!", GAMEWIDTH / 2 + 20, GAMEHEIGHT / 2); 
+                    
+                    //Block the players.......... 
+
+                    this.p.x_r = this.p.block_x_r; 
+                    this.p.y_r = this.p.block_y_r;
+                                
+                    this.p.x_b = this.p.block_x_b;
+                    this.p.y_b = this.p.block_y_b;
+
+                    this.maxs_r_x = 0; 
+                    this.maxs_r_y = 0; 
+                    this.maxs_b_x = 0; 
+                    this.maxs_b_y = 0; 
+
+                    //Move the inputs... 
+
+                    document.getElementById("R_score_points").style.top = 636; 
+                    document.getElementById("B_score_points").style.top = 636; 
+
+                    //Reload the page... 
+
+                    Player.Reload_The_Page(); 
+
+                }
+                
+                //If the Red player has won...... 
+
+                if(Score_points_B >= 10) {
+
+                    ctx.font = "100px Verdana"; 
+                    ctx.fillStyle = "Blue"; 
+                    ctx.fillText("Player Blue", GAMEWIDTH / 2 - 564 - 20, GAMEHEIGHT / 2); 
+                    ctx.fillStyle = "Red"; 
+                    ctx.fillText("has won!", GAMEWIDTH / 2 + 20, GAMEHEIGHT / 2); 
+                    
+                    //Block the players.......... 
+
+                    this.p.x_r = this.p.block_x_r; 
+                    this.p.y_r = this.p.block_y_r;
+                                
+                    this.p.x_b = this.p.block_x_b;
+                    this.p.y_b = this.p.block_y_b;
+
+                    this.maxs_r_x = 0; 
+                    this.maxs_r_y = 0; 
+                    this.maxs_b_x = 0; 
+                    this.maxs_b_y = 0; 
+
+                    //Move inputs... 
+
+                    document.getElementById("R_score_points").style.top = 636; 
+                    document.getElementById("B_score_points").style.top = 636; 
+
+                    //Reload the page... 
+
+                    Player.Reload_The_Page(); 
+
+                }
+
+                if (Score_points_B == 9 || Score_points_R == 9) {
+
+                    //Player.addMatchPointText(); 
+                    ctx.font = "100px Verdana"; 
+                    ctx.fillStyle = "Blue"; 
+                    ctx.fillText("Match", GAMEWIDTH / 2 - 300 - 20, GAMEHEIGHT / 2); 
+                    ctx.fillStyle = "Red"; 
+                    ctx.fillText("point!", GAMEWIDTH / 2 + 20, GAMEHEIGHT / 2); 
+
+                    this.maxs_o2_u = 10; 
+                    this.maxs_o2_u = 10;
+                    
+                    this.maxs_o2_d = 10; 
+                    this.maxs_o2_d = 10; 
+
+                }
+
+            }
+
+            update(deltaTime) {
+
+                if (!deltaTime) return;
+ 
+                //Move obstacle 2............................................................
+                
+                //Obstacle 2 up...... 
+
+                this.p.y_o2u += this.speed_o2_u; 
+
+                //this.speed_o2 = this.maxs_o2; 
+
+                if(this.p.y_o2u >= GAMEHEIGHT / 2 - this.height_o2) {
+
+                    this.speed_o2_u = - this.maxs_o2_u;  
+
+                } else if(this.p.y_o2u <= 0) {
+
+                    this.speed_o2_u = this.maxs_o2_u; 
+
+                } 
+
+                //Obstacle 2 Down...... 
+                
+                this.p.y_o2d += this.speed_o2_d; 
+
+                if (this.p.y_o2d <= GAMEHEIGHT / 2) {
+
+                    this.speed_o2_d = + this.maxs_o2_d; 
+
+                } else if(this.p.y_o2d >= GAMEHEIGHT - this.height_o2) {
+
+                    this.speed_o2_d = - this.maxs_o2_d; 
+
+                } 
+
+                this.p.x_f_r; 
+                this.p.y_f_r; 
+
+                //Red player cordinates............................................................
+                
+                this.p.x_r += this.speed_r_x;
+
+                this.p.y_r += this.speed_r_y;
+
+                if (this.p.x_r <= 0) this.p.x_r = 0;
+
+                if (this.p.x_r >= GAMEWIDTH - this.width) this.p.x_r = GAMEWIDTH - this.width;
+
+                if (this.p.y_r <= 0) this.p.y_r = 0;
+
+                if (this.p.y_r >= GAMEHEIGHT - this.height) this.p.y_r = GAMEHEIGHT - this.height;
+
+                //Blue player cordinates............................................................
+
+                this.p.x_b += this.speed_b_x;
+
+                this.p.y_b += this.speed_b_y;
+
+                if (this.p.x_b <= 0) this.p.x_b = 0; 
+
+                if (this.p.x_b >= GAMEWIDTH - this.width) this.p.x_b = GAMEWIDTH - this.width;
+
+                if (this.p.y_b <= 0) this.p.y_b = 0;
+
+                if (this.p.y_b >= GAMEHEIGHT - this.height) this.p.y_b = GAMEHEIGHT - this.height;
+
+                //colliding check
+
+                let x_center_R = this.p.x_r + this.width / 2;
+                let y_center_R = this.p.x_b + this.heigth / 2;
+
+                let x_center_B = this.p.x_b + this.width / 2;
+                let y_center_B = this.p.x_b + this.width / 2;
+
+                if (this.p.x_r <= this.p.x_b + this.width &&
+                    this.p.x_r + this.width >= this.p.x_b &&
+                    this.p.y_r <= this.p.y_b + this.height &&
+                    this.height + this.p.y_r >= this.p.y_b) {
+
+                        if (this.p.x_b < GAMEWIDTH / 2)  {
+                    
+                    //console.log("collide!!!"); 
+                    
+                    //If is in the Red area... 
+
+                            //Starting position of Red flag "that is blue"....................................
+                        
+                            this.p.x_f_r = GAMEWIDTH - GAMEWIDTH + 30 + this.width_f / 2; 
+                            this.p.y_f_r = GAMEHEIGHT / 2 - this.height / 2; 
+                            console.log(this.p.x_r, this.p.x_b); 
+                            //Starting position of Blue player............
+
+                            Player.Block_P_b(); 
+
+                    } else if (this.p.x_b > GAMEWIDTH / 2) {
+                    
+                    //If is in the Blue area... 
+                            
+                            //Starting position of Blue flag "that is Red"....................................
+                        
+                            this.p.x_f_b = GAMEWIDTH - 30 - this.width_f / 2; 
+                            this.p.y_f_b = GAMEHEIGHT / 2 - this.height / 2; 
+
+                            //Starting position of Red player............ 
+                            
+                            Player.Block_P_r(); 
+
+                    }
+                } 
+                
+                //Take the Blue flag "that is the red"; 
+                
+                if (this.p.x_b <= this.p.x_f_r + this.width_f_fs + 6 &&
+                    this.p.x_b + this.width >= this.p.x_f_r &&
+                    this.p.y_b <= this.p.y_f_r + this.height_f_fs &&
+                    this.height + this.p.y_b >= this.p.y_f_r) {
+                        
+                        //console.log(this.p.y_b, this.p.y_f_r); 
+                        //console.log(this.p.x_f_r); 
+                        //this.p.x_f_r = this.p.x_b - this.width_f + this.width - this.width_f + 6;    
+                        this.p.x_f_r = this.p.x_b + this.width - this.width_f;  
+                        this.p.y_f_r = this.p.y_b - 8;
+
+                    }
+
+                    //Take the Red flag "that is the blue"; 
+                    
+                    if (this.p.x_r <= this.p.x_f_b - this.width_f_fs - 6 &&
+                    this.p.x_r + this.width >= this.p.x_f_b &&
+                    this.p.y_r <= this.p.y_f_b + this.height_f_fs &&
+                    this.height + this.p.y_r >= this.p.y_f_b) {
+                        
+                        //console.log(this.p.y_b, this.p.y_f_r); 
+                        this.p.x_f_b = this.p.x_r + this.width_f;   
+                        this.p.y_f_b = this.p.y_r - 8;
+
+                    } 
+
+                    //Finish line of Red...
+                    
+                    if (this.p.x_f_r >= GAMEWIDTH - this.width_f - 1) {
+                        
+
+                        //Red flag "position left"....................................
+                    
+                        this.p.x_f_r = GAMEWIDTH - GAMEWIDTH + 30 + this.width_f / 2; 
+                        this.p.y_f_r = GAMEHEIGHT / 2 - this.height / 2; 
+                    
+                        //Blue flag "position right"....................................
+                     
+                        this.p.x_f_b = GAMEWIDTH - 30 - this.width_f / 2; 
+                        this.p.y_f_b = GAMEHEIGHT / 2 - this.height / 2; 
+                        
+                        //1 Point to the Blue Player.................................... 
+                         
+                        Score_points_B += 1; 
+                        document.getElementById("B_score_points").value = Score_points_B; 
+
+                        //Block the players...
+
+                        Player.Block_P(); 
+                    }
+
+                    //Finish line of blue...
+                    
+                    if (this.p.x_f_b <= GAMEWIDTH - GAMEWIDTH + this.width_f + 1) {
+                        
+
+                        //Red flag "position left"....................................
+                    
+                        this.p.x_f_r = GAMEWIDTH - GAMEWIDTH + 30 + this.width_f / 2; 
+                        this.p.y_f_r = GAMEHEIGHT / 2 - this.height / 2; 
+                    
+                        //Blue flag "position right"....................................
+                     
+                        this.p.x_f_b = GAMEWIDTH - 30 - this.width_f / 2; 
+                        this.p.y_f_b = GAMEHEIGHT / 2 - this.height / 2; 
+                        
+                        //1 Point to the Blue Player.................................... 
+
+                        Score_points_R += 1; 
+                        document.getElementById("R_score_points").value = Score_points_R;   
+
+                        Player.Block_P(); 
+                        
+                    }
+
+                    //if collide whith o1 obstacles............
+                    
+                    //For the enemies...
+
+                    if (this.p.x_r <= this.p.x_o1b + this.width_o1 &&
+                    this.p.x_r + this.width >= this.p.x_o1b &&
+                    this.p.y_r <= this.p.y_o1b + this.height_o1 &&
+                    this.height + this.p.y_r >= this.p.y_o1b) {
+                       
+                        //Starting position of Blue flag "that is Red"....................................
+                        
+                        this.p.x_f_b = GAMEWIDTH - 30 - this.width_f / 2; 
+                        this.p.y_f_b = GAMEHEIGHT / 2 - this.height / 2; 
+
+                        //this.maxs_r_x = 0; 
+                        //this.maxs_r_y = 0; 
+
+                        Player.Block_P_r(); 
+
+                    } 
+
+                    if (this.p.x_b <= this.p.x_o1r + this.width_o1 &&
+                    this.p.x_b + this.width >= this.p.x_o1r &&
+                    this.p.y_b <= this.p.y_o1r + this.height_o1 &&
+                    this.height + this.p.y_b >= this.p.y_o1r) {
+
+                        //Starting position of Red flag "that is blue"....................................
+                        
+                        this.p.x_f_r = GAMEWIDTH - GAMEWIDTH + 30 + this.width_f / 2; 
+                        this.p.y_f_r = GAMEHEIGHT / 2 - this.height / 2; 
+
+                        Player.Block_P_b(); 
+
+                    }
+                    
+                    //For the owners of the wall...
+
+                    if (this.p.x_r <= this.p.x_o1r + this.width_o1 &&
+                    this.p.x_r + this.width >= this.p.x_o1r &&
+                    this.p.y_r <= this.p.y_o1r + this.height_o1 &&
+                    this.height + this.p.y_r >= this.p.y_o1r) {
+                        
+                        this.p.x_r += - this.speed_r_x;   
+                        this.p.y_r += - this.speed_r_y;   
+                            
+                        //Starting position of Blue flag "that is Red"....................................
+                        
+                        this.p.x_f_b = GAMEWIDTH - 30 - this.width_f / 2; 
+                        this.p.y_f_b = GAMEHEIGHT / 2 - this.height / 2; 
+
+                        //this.maxs_r_x = 0; 
+                        //this.maxs_r_y = 0; 
+
+                    } 
+
+                    if (this.p.x_b <= this.p.x_o1b + this.width_o1 &&
+                    this.p.x_b + this.width >= this.p.x_o1b &&
+                    this.p.y_b <= this.p.y_o1b + this.height_o1 &&
+                    this.height + this.p.y_b >= this.p.y_o1b) {
+                        
+                        //this.maxs_r_x = 0; 
+                        //this.maxs_r_y = 0; 
+                        this.p.x_b += -this.speed_b_x;   
+                        this.p.y_b += - this.speed_b_y;   
+
+                        //Starting position of Red flag "that is blue"....................................
+                        
+                        this.p.x_f_r = GAMEWIDTH - GAMEWIDTH + 30 + this.width_f / 2;  
+                        this.p.y_f_r = GAMEHEIGHT / 2 - this.height / 2; 
+                        
+
+                    }
+
+                    //Collide with o2 obstacles "position: middle".................................... 
+
+                    //Obstacle Up...... 
+
+                    //Red player collision... 
+
+                    if (this.p.x_r <= this.p.x_o2u + this.width_o2 &&
+                    this.p.x_r + this.width >= this.p.x_o2u &&
+                    this.p.y_r <= this.p.y_o2u + this.height_o2 &&
+                    this.height + this.p.y_r >= this.p.y_o2u) {
+
+                        //Starting position of Blue flag "that is Red"....................................
+                        
+                        this.p.x_f_b = GAMEWIDTH - 30 - this.width_f / 2; 
+                        this.p.y_f_b = GAMEHEIGHT / 2 - this.height / 2; 
+
+                        Player.Block_P_r(); 
+
+                    }
+
+                    //Blue player collision... 
+                    
+                    if (this.p.x_b <= this.p.x_o2u + this.width_o2 &&
+                    this.p.x_b + this.width >= this.p.x_o2u &&
+                    this.p.y_b <= this.p.y_o2u + this.height_o2 &&
+                    this.height + this.p.y_b >= this.p.y_o2u) {
+
+                        //Starting position of Red flag "that is blue"....................................
+                        
+                        this.p.x_f_r = GAMEWIDTH - GAMEWIDTH + 30 + this.width_f / 2;  
+                        this.p.y_f_r = GAMEHEIGHT / 2 - this.height / 2; 
+
+                        Player.Block_P_b(); 
+
+                    } 
+
+                    //Obstacle Down...... 
+
+                    //Red player collision... 
+
+                    if (this.p.x_r <= this.p.x_o2d + this.width_o2 &&
+                    this.p.x_r + this.width >= this.p.x_o2u &&
+                    this.p.y_r <= this.p.y_o2d + this.height_o2 &&
+                    this.height + this.p.y_r >= this.p.y_o2d) {
+
+                        //Starting position of Blue flag "that is Red"....................................
+                        
+                        this.p.x_f_b = GAMEWIDTH - 30 - this.width_f / 2; 
+                        this.p.y_f_b = GAMEHEIGHT / 2 - this.height / 2; 
+
+                        Player.Block_P_r(); 
+
+                    } 
+
+                    //Blue player collision... 
+                    
+                    if (this.p.x_b <= this.p.x_o2d + this.width_o2 &&
+                    this.p.x_b + this.width >= this.p.x_o2d &&
+                    this.p.y_b <= this.p.y_o2d + this.height_o2 &&
+                    this.height + this.p.y_b >= this.p.y_o2d) {
+
+                        //Starting position of Red flag "that is blue"....................................
+                        
+                        this.p.x_f_r = GAMEWIDTH - GAMEWIDTH + 30 + this.width_f / 2;  
+                        this.p.y_f_r = GAMEHEIGHT / 2 - this.height / 2; 
+
+                        Player.Block_P_b(); 
+
+                    }
+
+
+
+                //this.p.x_b -= 5 / deltaTime; 
+            } 
+                
+            
+        }
+        
+        
+        let Player = new player(GAMEWIDTH, GAMEHEIGHT); 
+
+
+        Player.draw(ctx);
+
+        //fill the all area
+
+        class input_keyboard {
+
+            constructor(Player) {
+                document.addEventListener('keydown', event => {
+
+                    //alert(event.keyCode); 
+
+                    //RED PLAYER KEYS
+
+                    switch (event.keyCode) {
+                        case 87:
+                            //console.log("sopra");
+                            Player.moveU_Red();
+                            break;
+                        case 68:
+                            //console.log("destra");
+                            Player.moveR_Red();
+                            break;
+                        case 83:
+                            //console.log("sotto");
+                            Player.moveD_Red();
+                            break; 
+                        case 65:
+                            //console.log("sinistra");
+                            Player.moveL_Red();
+                            break;
+
+
+                    }
+
+                    //BLUE PLAYER KEYS 
+
+                    switch (event.keyCode) {
+                        case 73:
+                            //console.log("sopra");
+                            Player.moveU_Blue();
+                            break;
+                        case 76:
+                            //console.log("destra");
+                            Player.moveR_Blue();
+                            break;
+                        case 75:
+                            //console.log("sotto");
+                            Player.moveD_Blue();
+                            break;
+                        case 74:
+                            //console.log("sinistra");
+                            Player.moveL_Blue();
+                            break;
+
+
+                    }
+
+
+
+                });
+
+                document.addEventListener('keyup', event => {
+
+                    //alert(event.keyCode); 
+
+                    //Red player stop..............................................
+
+                    switch (event.keyCode) {
+                        case 87:
+                            //console.log("sopra");
+                            if (Player.speed_r_y < 0) Player.stop_r_y(); 
+                            break;
+                        case 68:
+                            //console.log("destra");
+                            if (Player.speed_r_x > 0) Player.stop_r_x();
+                            break;
+                        case 83:
+                            //console.log("sotto");
+                            if (Player.speed_r_y > 0) Player.stop_r_y();
+                            break;
+                        case 65:
+                            //console.log("sinistra");
+                            if (Player.speed_r_x < 0) Player.stop_r_x();
+                            break;
+                    }
+
+                    //Blue player stop..............................................
+
+                    switch (event.keyCode) {
+                        case 73:
+                            //console.log("sopra");
+                            if (Player.speed_b_y < 0) Player.stop_b_y();
+                            break;
+                        case 76:
+                            //console.log("destra");
+                            if (Player.speed_b_x > 0) Player.stop_b_x();
+                            break;
+                        case 75:
+                            //console.log("sotto");
+                            if (Player.speed_b_y > 0) Player.stop_b_y();
+                            break;
+                        case 74:
+                            //console.log("sinistra");
+                            if (Player.speed_b_x < 0) Player.stop_b_x();
+                            break;
+
+                    }
+
+
+                });
+
+            }
+        }
+
+        let lastTime = 0;
+
+        new input_keyboard(Player);
+
+        function Loop(timestamp) {
+
+            let deltaTime = timestamp - lastTime;
+
+            lastTime = timestamp;
+
+            ctx.clearRect(0, 0, GAMEWIDTH, GAMEHEIGHT);
+            Player.update(deltaTime);
+            Player.draw(ctx);
+
+            requestAnimationFrame(Loop);
+        }
+        Loop();
+
+        //Player.draw(ctx);
+
+        //resolve that problem that make all doesn't work....
+
+    </script>
+    <style>
+        
+        body {
+            background: black; 
+            font-family: Verdana; 
+        }
+        #game {
+            border: 2px solid; 
+            display: block; 
+        } 
+        
+        #R_score_points {
+            height: 50px; 
+            width: 50px; 
+            font-size: 34px; 
+            text-align: center; 
+            color: white; 
+            text-align: center; 
+            background-color: red; 
+            border: 2px solid red;  
+            position: absolute; 
+            top: 355px; 
+            left: 364px; 
+            outline: none; 
+        }
+
+        #B_score_points {
+            height: 50px; 
+            width: 50px; 
+            font-size: 34px; 
+            text-align: center; 
+            color: white; 
+            background-color: blue;  
+            border: 2px solid blue;   
+            position: absolute; 
+            top: 355px; 
+            right: 364px; 
+            outline: none; 
+        }
+
+        h1 {
+            color: white; 
+            font-size: 24px; 
+            position: relative;  
+            top: -10px; 
+            height: 5px; 
+        }
+
+         #My_name {
+            color: white; 
+            font-size: 24px; 
+            position: absolute; 
+            top: -16px; 
+            right: 12px; 
+            height: 5px; 
+         }
+        /*Giallino: rgb(208, 255, 0)*/
+
+    </style>
+
+</body>
+
+    <!--Per Simone Da Jonathan Cellucci, divertiti!-->
+
+</html>
