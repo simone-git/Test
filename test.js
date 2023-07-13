@@ -15,25 +15,6 @@ window.addEventListener("resize", resizeGameCanvas, false);
 
 // ----- IMAGES ----- //
 let images = [];
-(function loadImages() {
-    let img_bg = new Image(), img_bg_ok = false;  // Background
-    img_bg.onload = function() {
-        img_bg_ok = true;
-        images["bg"] = img_bg;
-    }
-    img_bg.src = "./data/images/game/background.png";
-
-    let img_brick = new Image(), img_brick_ok = false;  // Brick
-    img_brick.onload = function() {
-        img_brick_ok = true;
-        images["brick"] = img_brick;
-    }
-    img_brick.src = "./data/images/game/brick.png";
-
-    while(!img_bg_ok || !img_brick_ok) {
-        console.log("waiting:", img_bg_ok, img_brick_ok);
-    }
-})();
 // ----- IMAGES ----- //
 
 
