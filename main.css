@@ -1,5 +1,5 @@
 .mybody{
-    background-image: url('brick.png');
+    background-image: url("data/images/canvas_bg.png");
     margin:0px; 
     min-width: 100%; 
     min-height: 100%; 
