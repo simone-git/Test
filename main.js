@@ -43,35 +43,58 @@ window.addEventListener("resize", resizeCanvas, false);
 
 // ----- IMAGES ----- //
 let imgPaths = [
-    "data/images/home/background.png",
+    // Common
+    "data/images/common/background.png",
+
+    // Play
     "data/images/home/title.png",
     "data/images/home/play.png",
     "data/images/home/play-over.png",
     "data/images/home/settings.png",
     "data/images/home/settings-over.png",
     "data/images/home/inventory.png",
-    "data/images/home/inventory-over.png"
+    "data/images/home/inventory-over.png",
+
+    // Levels
+    "data/images/levels/title.png",
+    "data/images/levels/back.png",
+    "data/images/levels/back-over.png"
 ];
 let imgAliases = [
-    "home_bg",
+    //Common
+    "common_bg",
+
+    // Play
     "home_title",
     "home_play",
     "home_play_over",
     "home_set",
     "home_set_over",
     "home_inv",
-    "home_inv_over"
+    "home_inv_over",
+
+    // Levels
+    "levels_title",
+    "levels_back",
+    "levels_back_over"
 ];
-// OPTIMIZE: there are useless calculations in mouseTestBox: maybe remove its for()
 let imgBoxSpecs = [  // Values: [0, 1]; CORNERS: left, top, right, bottom; CENTER: x, y, w / h
+    // Common
     ["CORNERS", 0, 0, 1, 1],
+
+    // Play
     ["CENTER", 0.5, 0.2, "W", 0.5],
     ["CENTER", 0.5, 0.5, "W", 0.2],
     ["CENTER", 0.5, 0.5, "W", 0.2],
     ["CENTER", 0.3, 0.7, "W", 0.2],
     ["CENTER", 0.3, 0.7, "W", 0.2],
     ["CENTER", 0.5, 0.7, "W", 0.2],
-    ["CENTER", 0.5, 0.7, "W", 0.2]
+    ["CENTER", 0.5, 0.7, "W", 0.2],
+
+    // Levels
+    ["CENTER", 0.5, 0.2, "W", 0.5],
+    ["CENTER", 0.3, 0.8, "W", 0.2],
+    ["CENTER", 0.3, 0.8, "W", 0.2]
 ];
 let imgBoxes = [];
 let images = [];
@@ -132,13 +155,13 @@ function boxImages() {
 
 // ----- MOUSE ----- //
 let mouseInfo = [];
-mouseInfo["mouse-x"] = 0;
-mouseInfo["mouse-y"] = 0;
+mouseInfo["x"] = 0;
+mouseInfo["y"] = 0;
 
 function mouseEvent(event) {
     switch (event.type) {
         case "mousemove":
-            mouseInfo["moving"] = true;
+            // mouseInfo["moving"] = true;
 
             let gameRect = document.getElementById("game").getBoundingClientRect();
             mouseInfo["x"] = event.clientX - gameRect.left;
@@ -146,8 +169,7 @@ function mouseEvent(event) {
             break;
         
             case "mousedown":
-                mouseInfo["down"] = true;
-                mouseInfo["up"] = false;
+                mouseInfo["clicked"] = true;
                 break;
     
             case "mouseup":
@@ -162,7 +184,7 @@ function mouseEvent(event) {
 
 document.addEventListener("mousemove", mouseEvent);
 document.addEventListener("mousedown", mouseEvent);
-document.addEventListener("mouseup", mouseEvent);
+// document.addEventListener("mouseup", mouseEvent);
 // ----- MOUSE ----- //
 
 
@@ -210,21 +232,46 @@ function resizeCanvas(boxImgs = true) {
 }
 
 
-function mouseTestBox(box) {
+function mouseTestBox(alias) {
     let x = mouseInfo["x"];
     let y = mouseInfo["y"];
 
-    if(imgAliases.includes(box)) {
-        return x >= imgBoxes[box].left && x <= imgBoxes[box].right && y >= imgBoxes[box].top && y <= imgBoxes[box].bottom;
+    if(imgAliases.includes(alias)) {
+        return x >= imgBoxes[alias].left && x <= imgBoxes[alias].right && y >= imgBoxes[alias].top && y <= imgBoxes[alias].bottom;
     }
     return false;
 }
 
 
 function update() {
-    // mouseInfo["clicked"]
+    if(mouseInfo["clicked"] == true) {
+        switch (scene) {
+            case "home":
+                if(mouseTestBox("home_play")) scene = "levels";
+                // if(mouseTestBox("home_set")) scene = "settings";
+                // if(mouseTestBox("home_inv")) scene = "inventory";
+                break;
+        
+            case "levels":
+                if(mouseTestBox("levels_back")) scene = "home";
+                break;
+        }
+    }
+
+    mouseInfo["clicked"] = false;
 }
 
+
+function drawImage(alias, alias_over = alias) {
+    let img;
+    if(alias_over == alias) {
+        img = images[alias];
+    } else {
+        img = mouseTestBox(alias) ? images[alias_over] : images[alias];
+    }
+
+    game.drawImage(img, imgBoxes[alias].left, imgBoxes[alias].top, imgBoxes[alias].width, imgBoxes[alias].height);
+}
 
 function draw() {
     game.fillStyle = "rgb(200, 250, 250)";
@@ -232,11 +279,17 @@ function draw() {
 
     switch (scene) {
         case "home":
-            game.drawImage(images["home_bg"], imgBoxes["home_bg"].left, imgBoxes["home_bg"].top, imgBoxes["home_bg"].width, imgBoxes["home_bg"].height);
-            game.drawImage(images["home_title"], imgBoxes["home_title"].left, imgBoxes["home_title"].top, imgBoxes["home_title"].width, imgBoxes["home_title"].height);
-            game.drawImage(mouseTestBox("home_play") ? images["home_play_over"] : images["home_play"], imgBoxes["home_play"].left, imgBoxes["home_play"].top, imgBoxes["home_play"].width, imgBoxes["home_play"].height);
-            game.drawImage(mouseTestBox("home_set") ? images["home_set_over"] : images["home_set"], imgBoxes["home_set"].left, imgBoxes["home_set"].top, imgBoxes["home_set"].width, imgBoxes["home_set"].height);
-            game.drawImage(mouseTestBox("home_inv") ? images["home_inv_over"] : images["home_inv"], imgBoxes["home_inv"].left, imgBoxes["home_inv"].top, imgBoxes["home_inv"].width, imgBoxes["home_inv"].height);
+            drawImage("common_bg");
+            drawImage("home_title");
+            drawImage("home_play", "home_play_over");
+            drawImage("home_set", "home_set_over");
+            drawImage("home_inv", "home_inv_over");
+            break;
+
+        case "levels":
+            drawImage("common_bg");
+            drawImage("levels_title");
+            drawImage("levels_back", "levels_back_over");
             break;
     }
 
@@ -246,6 +299,6 @@ function draw() {
     game.textBaseline = "top";
     let text = "FPS: " + fps + " / " +
         gWIDTH + " x " + gHEIGHT + " / " + 
-        "MOUSE: (" + mouseInfo["mouse-x"] + ", " + mouseInfo["mouse-y"] + ")";
+        "MOUSE: (" + mouseInfo["x"] + ", " + mouseInfo["y"] + ")";
     game.fillText(text, 8, 4);
 }
