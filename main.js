@@ -1,6 +1,34 @@
+class Vector {
+    constructor(x = 0, y = 0) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
+
+class Box {
+    constructor() {
+
+    }
+}
+
+
+class Button {
+    constructor(left, top, right, bottom) {
+        this.left = left;
+        this.top = top;
+        this.right = right;
+        this.bottom = bottom;
+    }
+}
+let b = new Button(1, 2, 3, 4);
+
+
 // ----- CANVAS ----- //
 let canvas = document.getElementById("game");
 let game = canvas.getContext("2d")
+let scene = "home";
+let prevTime = 0, fps = 0;
 
 /*let frameCanvas = document.createElement("canvas");  // Can also use OffscreenCanvas
 frameCanvas.setAttribute("id", "frame");
@@ -8,7 +36,7 @@ let frame = frameCanvas.getContext("2d");*/
 
 let gWIDTH, gHEIGHT, fWIDTH = 32, fHEIGHT = 18, ratio = 16 / 9;
 
-resizeCanvas();
+resizeCanvas(false);
 window.addEventListener("resize", resizeCanvas, false);
 // ----- CANVAS ----- //
 
@@ -28,14 +56,24 @@ let imgAliases = [
     "home_set",
     "home_inv"
 ];
-let loadedImages = 0;
+let imgBoxSpecs = [  // Values: [0, 1]; CORNERS: left, top, right, bottom; CENTER: x, y, w / h
+    ["CORNERS", 0, 0, 1, 1],
+    ["CENTER", 0.5, 0.2, "W", 0.5],
+    ["CENTER", 0.5, 0.5, "W", 0.2],
+    ["CENTER", 0.3, 0.7, "W", 0.2],
+    ["CENTER", 0.5, 0.7, "W", 0.2]
+];
+let imgBoxes = [];
 let images = [];
+let loadedImages = 0;
 
 document.addEventListener("DOMContentLoaded", function() {
     function imageLoaded() {
         loadedImages++;
 
-        if(loadedImages == imgPaths.length){
+        if(loadedImages == imgPaths.length) {
+            boxImages();
+            
             document.getElementById("loading").remove();
             document.getElementById("game").style.display = "block";
             window.requestAnimationFrame(gameLoop);
@@ -50,6 +88,35 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 });
+
+function boxImages() {
+    for(let i = 0; i < imgAliases.length; i++) {
+        imgBoxes[imgAliases[i]] = [];
+
+        if(imgBoxSpecs[i][0] == "CORNERS") {
+            imgBoxes[imgAliases[i]]["left"] = gWIDTH * imgBoxSpecs[i][1];
+            imgBoxes[imgAliases[i]]["top"] = gHEIGHT * imgBoxSpecs[i][2];
+            imgBoxes[imgAliases[i]]["right"] = gWIDTH * imgBoxSpecs[i][3];
+            imgBoxes[imgAliases[i]]["bottom"] = gHEIGHT * imgBoxSpecs[i][4];
+        } else if(imgBoxSpecs[i][0] == "CENTER") {
+            let W, H;
+            if(imgBoxSpecs[i][3] == "W") {
+                W = gWIDTH * imgBoxSpecs[i][4];
+                H = W * images[imgAliases[i]].height / images[imgAliases[i]].width;
+            } else {
+                H = gHEIGHT * imgBoxSpecs[i][4];
+                W = H * images[imgAliases[i]].width / images[imgAliases[i]].height;
+            }
+
+            imgBoxes[imgAliases[i]]["left"] = gWIDTH * imgBoxSpecs[i][1] - 0.5 * W;
+            imgBoxes[imgAliases[i]]["top"] = gHEIGHT * imgBoxSpecs[i][2] - 0.5 * H;
+            imgBoxes[imgAliases[i]]["right"] = gWIDTH * imgBoxSpecs[i][1] + 0.5 * W;
+            imgBoxes[imgAliases[i]]["bottom"] = gHEIGHT * imgBoxSpecs[i][2] + 0.5 * H;
+        }
+        imgBoxes[imgAliases[i]]["width"] = imgBoxes[imgAliases[i]]["right"] - imgBoxes[imgAliases[i]]["left"];
+        imgBoxes[imgAliases[i]]["height"] = imgBoxes[imgAliases[i]]["bottom"] - imgBoxes[imgAliases[i]]["top"];
+    }
+}
 // ----- IMAGES ----- //
 
 
@@ -101,7 +168,6 @@ document.addEventListener("keyup", keyboardEvent);
 // ----- KEYBOARD ----- //
 
 
-let prevTime = 0, fps = 0;
 function gameLoop(timeStamp) {
     var deltaTime = timeStamp - prevTime;
     prevTime = timeStamp;
@@ -115,7 +181,7 @@ function gameLoop(timeStamp) {
 }
 
 
-function resizeCanvas() {
+function resizeCanvas(boxImgs = true) {
     if(window.innerWidth / window.innerHeight >= ratio) {
         gWIDTH = Math.round(window.innerHeight * ratio);
         gHEIGHT = window.innerHeight;
@@ -126,6 +192,10 @@ function resizeCanvas() {
         gHEIGHT = Math.round(window.innerWidth / ratio);
         canvas.width = gWIDTH;
         canvas.height = gHEIGHT;
+    }
+
+    if(boxImgs) {
+        boxImages();
     }
 }
 
@@ -139,14 +209,22 @@ function draw() {
     game.fillStyle = "rgb(200, 250, 250)";
     game.fillRect(0, 0, gWIDTH, gHEIGHT);
 
-    game.drawImage(images["home_bg"], 0, 0, gWIDTH, gHEIGHT);
+    switch (scene) {
+        case "home":
+            game.drawImage(images["home_bg"], imgBoxes["home_bg"].left, imgBoxes["home_bg"].top, imgBoxes["home_bg"].width, imgBoxes["home_bg"].height);
+            game.drawImage(images["home_title"], imgBoxes["home_title"].left, imgBoxes["home_title"].top, imgBoxes["home_title"].width, imgBoxes["home_title"].height);
+            game.drawImage(images["home_play"], imgBoxes["home_play"].left, imgBoxes["home_play"].top, imgBoxes["home_play"].width, imgBoxes["home_play"].height);
+            game.drawImage(images["home_set"], imgBoxes["home_set"].left, imgBoxes["home_set"].top, imgBoxes["home_set"].width, imgBoxes["home_set"].height);
+            game.drawImage(images["home_inv"], imgBoxes["home_inv"].left, imgBoxes["home_inv"].top, imgBoxes["home_inv"].width, imgBoxes["home_inv"].height);
+            break;
+    }
 
     game.fillStyle = "black";
-    game.font = "24px courier";
+    game.font = "20px courier";
     game.textAlign = "start";
     game.textBaseline = "top";
     let text = "FPS: " + fps + " / " +
         gWIDTH + " x " + gHEIGHT + " / " + 
         "MOUSE: (" + mouseInfo["mouse-x"] + ", " + mouseInfo["mouse-y"] + ")";
-    game.fillText(text, 15, 10);
+    game.fillText(text, 8, 4);
 }
