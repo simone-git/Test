@@ -46,21 +46,31 @@ let imgPaths = [
     "data/images/home/background.png",
     "data/images/home/title.png",
     "data/images/home/play.png",
+    "data/images/home/play-over.png",
     "data/images/home/settings.png",
-    "data/images/home/inventory.png"
+    "data/images/home/settings-over.png",
+    "data/images/home/inventory.png",
+    "data/images/home/inventory-over.png"
 ];
 let imgAliases = [
     "home_bg",
     "home_title",
     "home_play",
+    "home_play_over",
     "home_set",
-    "home_inv"
+    "home_set_over",
+    "home_inv",
+    "home_inv_over"
 ];
+// OPTIMIZE: there are useless calculations in mouseTestBox: maybe remove its for()
 let imgBoxSpecs = [  // Values: [0, 1]; CORNERS: left, top, right, bottom; CENTER: x, y, w / h
     ["CORNERS", 0, 0, 1, 1],
     ["CENTER", 0.5, 0.2, "W", 0.5],
     ["CENTER", 0.5, 0.5, "W", 0.2],
+    ["CENTER", 0.5, 0.5, "W", 0.2],
     ["CENTER", 0.3, 0.7, "W", 0.2],
+    ["CENTER", 0.3, 0.7, "W", 0.2],
+    ["CENTER", 0.5, 0.7, "W", 0.2],
     ["CENTER", 0.5, 0.7, "W", 0.2]
 ];
 let imgBoxes = [];
@@ -128,21 +138,21 @@ mouseInfo["mouse-y"] = 0;
 function mouseEvent(event) {
     switch (event.type) {
         case "mousemove":
-            mouseInfo["mousemove"] = true;
+            mouseInfo["moving"] = true;
 
             let gameRect = document.getElementById("game").getBoundingClientRect();
-            mouseInfo["mouse-x"] = event.clientX - gameRect.left;
-            mouseInfo["mouse-y"] = event.clientY - gameRect.top;
+            mouseInfo["x"] = event.clientX - gameRect.left;
+            mouseInfo["y"] = event.clientY - gameRect.top;
             break;
         
             case "mousedown":
-                mouseInfo["mousedown"] = true;
-                mouseInfo["mouseup"] = false;
+                mouseInfo["down"] = true;
+                mouseInfo["up"] = false;
                 break;
     
             case "mouseup":
-                mouseInfo["mouseup"] = true;
-                mouseInfo["mousedown"] = false;
+                mouseInfo["up"] = true;
+                mouseInfo["down"] = false;
                 break;
     
         default:
@@ -200,8 +210,19 @@ function resizeCanvas(boxImgs = true) {
 }
 
 
+function mouseTestBox(box) {
+    let x = mouseInfo["x"];
+    let y = mouseInfo["y"];
+
+    if(imgAliases.includes(box)) {
+        return x >= imgBoxes[box].left && x <= imgBoxes[box].right && y >= imgBoxes[box].top && y <= imgBoxes[box].bottom;
+    }
+    return false;
+}
+
+
 function update() {
-    
+    // mouseInfo["clicked"]
 }
 
 
@@ -213,9 +234,9 @@ function draw() {
         case "home":
             game.drawImage(images["home_bg"], imgBoxes["home_bg"].left, imgBoxes["home_bg"].top, imgBoxes["home_bg"].width, imgBoxes["home_bg"].height);
             game.drawImage(images["home_title"], imgBoxes["home_title"].left, imgBoxes["home_title"].top, imgBoxes["home_title"].width, imgBoxes["home_title"].height);
-            game.drawImage(images["home_play"], imgBoxes["home_play"].left, imgBoxes["home_play"].top, imgBoxes["home_play"].width, imgBoxes["home_play"].height);
-            game.drawImage(images["home_set"], imgBoxes["home_set"].left, imgBoxes["home_set"].top, imgBoxes["home_set"].width, imgBoxes["home_set"].height);
-            game.drawImage(images["home_inv"], imgBoxes["home_inv"].left, imgBoxes["home_inv"].top, imgBoxes["home_inv"].width, imgBoxes["home_inv"].height);
+            game.drawImage(mouseTestBox("home_play") ? images["home_play_over"] : images["home_play"], imgBoxes["home_play"].left, imgBoxes["home_play"].top, imgBoxes["home_play"].width, imgBoxes["home_play"].height);
+            game.drawImage(mouseTestBox("home_set") ? images["home_set_over"] : images["home_set"], imgBoxes["home_set"].left, imgBoxes["home_set"].top, imgBoxes["home_set"].width, imgBoxes["home_set"].height);
+            game.drawImage(mouseTestBox("home_inv") ? images["home_inv_over"] : images["home_inv"], imgBoxes["home_inv"].left, imgBoxes["home_inv"].top, imgBoxes["home_inv"].width, imgBoxes["home_inv"].height);
             break;
     }
 
