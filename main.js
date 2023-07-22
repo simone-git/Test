@@ -1,29 +1,3 @@
-class Vector {
-    constructor(x = 0, y = 0) {
-        this.x = x;
-        this.y = y;
-    }
-}
-
-
-class Box {
-    constructor() {
-
-    }
-}
-
-
-class Button {
-    constructor(left, top, right, bottom) {
-        this.left = left;
-        this.top = top;
-        this.right = right;
-        this.bottom = bottom;
-    }
-}
-let b = new Button(1, 2, 3, 4);
-
-
 // ----- CANVAS ----- //
 let canvas = document.getElementById("game");
 let game = canvas.getContext("2d")
@@ -46,7 +20,7 @@ let imgPaths = [
     // Common
     "data/images/common/background.png",
 
-    // Play
+    // Home
     "data/images/home/title.png",
     "data/images/home/play.png",
     "data/images/home/play-over.png",
@@ -58,13 +32,17 @@ let imgPaths = [
     // Levels
     "data/images/levels/title.png",
     "data/images/levels/back.png",
-    "data/images/levels/back-over.png"
+    "data/images/levels/back-over.png",
+    "data/images/levels/level.png",
+    "data/images/levels/level-over.png",
+    "data/images/levels/padlock.png",
+    "data/images/levels/padlock-over.png"
 ];
 let imgAliases = [
     //Common
     "common_bg",
 
-    // Play
+    // Home
     "home_title",
     "home_play",
     "home_play_over",
@@ -76,78 +54,82 @@ let imgAliases = [
     // Levels
     "levels_title",
     "levels_back",
-    "levels_back_over"
+    "levels_back_over",
+    "levels_level",
+    "levels_level_over",
+    "levels_padlock",
+    "levels_padlock_over"
 ];
-let imgBoxSpecs = [  // Values: [0, 1]; CORNERS: left, top, right, bottom; CENTER: x, y, w / h
-    // Common
-    ["CORNERS", 0, 0, 1, 1],
+let images = [];  // Container of only images
 
-    // Play
-    ["CENTER", 0.5, 0.2, "W", 0.5],
-    ["CENTER", 0.5, 0.5, "W", 0.2],
-    ["CENTER", 0.5, 0.5, "W", 0.2],
-    ["CENTER", 0.3, 0.7, "W", 0.2],
-    ["CENTER", 0.3, 0.7, "W", 0.2],
-    ["CENTER", 0.5, 0.7, "W", 0.2],
-    ["CENTER", 0.5, 0.7, "W", 0.2],
+// OPTIMIZE: Can remove overs?
+let boxSpecs = [  // Syntax: boxAlias (id), imgAlias (source1), imgAlias_over (source2), specs: (CORNERS: left, top, right, bottom; CENTER: x, y, w / h); Values: [0, 1]
+    // Common
+    ["common_bg",               "common_bg",            "common_bg",                "CORNERS", 0, 0, 1, 1],
+
+    // Home
+    ["home_title",              "home_title",           "home_title",               "CENTER", 0.5, 0.2, "W", 0.5],
+    ["home_play",               "home_play",            "home_play_over",           "CENTER", 0.5, 0.5, "W", 0.2],
+    ["home_set",                "home_set",             "home_set_over",            "CENTER", 0.2, 0.8, "W", 0.2],
+    ["home_inv",                "home_inv",             "home_inv_over",            "CENTER", 0.5, 0.7, "W", 0.2],
 
     // Levels
-    ["CENTER", 0.5, 0.2, "W", 0.5],
-    ["CENTER", 0.3, 0.8, "W", 0.2],
-    ["CENTER", 0.3, 0.8, "W", 0.2]
+    ["levels_title",            "levels_title",         "levels_title",             "CENTER", 0.5, 0.15, "W", 0.4],
+    ["levels_back",             "levels_back",          "levels_back_over",         "CENTER", 0.1, 0.9, "W", 0.15],
+    ["levels_level_1x1",        "levels_level",         "levels_level_over",        "CENTER", 0.1, 0.9, "W", 0.15],
+    ["levels_padlock_1x1",      "levels_padlock",       "levels_padlock_over",      "CENTER", 0.1, 0.9, "W", 0.15]
 ];
-let imgBoxes = [];
-let images = [];
+let boxes = [];  // Container of only boxes
+
 let loadedImages = 0;
-
 document.addEventListener("DOMContentLoaded", function() {
-    function imageLoaded() {
-        loadedImages++;
-
-        if(loadedImages == imgPaths.length) {
-            boxImages();
-            
-            document.getElementById("loading").remove();
-            document.getElementById("game").style.display = "block";
-            window.requestAnimationFrame(gameLoop);
-        }
-    }
-    
     for(let i = 0; i < imgPaths.length; i++) {
         images[imgAliases[i]] = new Image();
         images[imgAliases[i]].src = imgPaths[i];
         images[imgAliases[i]].onload = function() {
-            imageLoaded();
+            loadedImages++;
+
+            if(loadedImages == imgPaths.length) {
+                boxImages();
+                
+                document.getElementById("loading").remove();
+                document.getElementById("game").style.display = "block";
+                window.requestAnimationFrame(gameLoop);
+            }
         }
     }
 });
 
 function boxImages() {
-    for(let i = 0; i < imgAliases.length; i++) {
-        imgBoxes[imgAliases[i]] = [];
+    for(let i = 0; i < boxSpecs.length; i++) {
+        boxes[boxSpecs[i][0]] = [];
 
-        if(imgBoxSpecs[i][0] == "CORNERS") {
-            imgBoxes[imgAliases[i]]["left"] = gWIDTH * imgBoxSpecs[i][1];
-            imgBoxes[imgAliases[i]]["top"] = gHEIGHT * imgBoxSpecs[i][2];
-            imgBoxes[imgAliases[i]]["right"] = gWIDTH * imgBoxSpecs[i][3];
-            imgBoxes[imgAliases[i]]["bottom"] = gHEIGHT * imgBoxSpecs[i][4];
-        } else if(imgBoxSpecs[i][0] == "CENTER") {
+        if(boxSpecs[i][3] == "CORNERS") {
+            boxes[boxSpecs[i][0]]["left"] = gWIDTH * boxSpecs[i][4];
+            boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5];
+            boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][6];
+            boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][7];
+        } else if(boxSpecs[i][3] == "CENTER") {
             let W, H;
-            if(imgBoxSpecs[i][3] == "W") {
-                W = gWIDTH * imgBoxSpecs[i][4];
-                H = W * images[imgAliases[i]].height / images[imgAliases[i]].width;
+            if(boxSpecs[i][6] == "W") {
+                W = gWIDTH * boxSpecs[i][7];
+                H = W * images[boxSpecs[i][1]].height / images[boxSpecs[i][1]].width;
             } else {
-                H = gHEIGHT * imgBoxSpecs[i][4];
-                W = H * images[imgAliases[i]].width / images[imgAliases[i]].height;
+                H = gHEIGHT * boxSpecs[i][7];
+                W = H * images[boxSpecs[i][1]].width / images[boxSpecs[i][1]].height;
             }
 
-            imgBoxes[imgAliases[i]]["left"] = gWIDTH * imgBoxSpecs[i][1] - 0.5 * W;
-            imgBoxes[imgAliases[i]]["top"] = gHEIGHT * imgBoxSpecs[i][2] - 0.5 * H;
-            imgBoxes[imgAliases[i]]["right"] = gWIDTH * imgBoxSpecs[i][1] + 0.5 * W;
-            imgBoxes[imgAliases[i]]["bottom"] = gHEIGHT * imgBoxSpecs[i][2] + 0.5 * H;
+            boxes[boxSpecs[i][0]]["left"] = gWIDTH * boxSpecs[i][4] - 0.5 * W;
+            boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] - 0.5 * H;
+            boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][4] + 0.5 * W;
+            boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][5] + 0.5 * H;
         }
-        imgBoxes[imgAliases[i]]["width"] = imgBoxes[imgAliases[i]]["right"] - imgBoxes[imgAliases[i]]["left"];
-        imgBoxes[imgAliases[i]]["height"] = imgBoxes[imgAliases[i]]["bottom"] - imgBoxes[imgAliases[i]]["top"];
+
+        boxes[boxSpecs[i][0]]["width"] = boxes[boxSpecs[i][0]]["right"] - boxes[boxSpecs[i][0]]["left"];
+        boxes[boxSpecs[i][0]]["height"] = boxes[boxSpecs[i][0]]["bottom"] - boxes[boxSpecs[i][0]]["top"];
+
+        boxes[boxSpecs[i][0]]["image"] = boxSpecs[i][1];
+        boxes[boxSpecs[i][0]]["image_over"] = boxSpecs[i][2];
     }
 }
 // ----- IMAGES ----- //
@@ -164,8 +146,8 @@ function mouseEvent(event) {
             // mouseInfo["moving"] = true;
 
             let gameRect = document.getElementById("game").getBoundingClientRect();
-            mouseInfo["x"] = event.clientX - gameRect.left;
-            mouseInfo["y"] = event.clientY - gameRect.top;
+            mouseInfo["x"] = Math.round(event.clientX - gameRect.left);
+            mouseInfo["y"] = Math.round(event.clientY - gameRect.top);
             break;
         
             case "mousedown":
@@ -232,14 +214,11 @@ function resizeCanvas(boxImgs = true) {
 }
 
 
-function mouseTestBox(alias) {
+function mouseTestBox(box) {
     let x = mouseInfo["x"];
     let y = mouseInfo["y"];
 
-    if(imgAliases.includes(alias)) {
-        return x >= imgBoxes[alias].left && x <= imgBoxes[alias].right && y >= imgBoxes[alias].top && y <= imgBoxes[alias].bottom;
-    }
-    return false;
+    return boxes[box] != undefined && x >= boxes[box].left && x <= boxes[box].right && y >= boxes[box].top && y <= boxes[box].bottom;
 }
 
 
@@ -262,15 +241,14 @@ function update() {
 }
 
 
-function drawImage(alias, alias_over = alias) {
-    let img;
-    if(alias_over == alias) {
-        img = images[alias];
-    } else {
-        img = mouseTestBox(alias) ? images[alias_over] : images[alias];
-    }
-
-    game.drawImage(img, imgBoxes[alias].left, imgBoxes[alias].top, imgBoxes[alias].width, imgBoxes[alias].height);
+function drawBox(box) {
+    game.drawImage(
+        mouseTestBox(box) ? images[boxes[box].image_over] : images[boxes[box].image],
+        boxes[box].left,
+        boxes[box].top,
+        boxes[box].width,
+        boxes[box].height
+    );
 }
 
 function draw() {
@@ -279,17 +257,17 @@ function draw() {
 
     switch (scene) {
         case "home":
-            drawImage("common_bg");
-            drawImage("home_title");
-            drawImage("home_play", "home_play_over");
-            drawImage("home_set", "home_set_over");
-            drawImage("home_inv", "home_inv_over");
+            drawBox("common_bg");
+            drawBox("home_title");
+            drawBox("home_play");
+            drawBox("home_set");
+            drawBox("home_inv");
             break;
 
         case "levels":
-            drawImage("common_bg");
-            drawImage("levels_title");
-            drawImage("levels_back", "levels_back_over");
+            drawBox("common_bg");
+            drawBox("levels_title");
+            drawBox("levels_back");
             break;
     }
 
