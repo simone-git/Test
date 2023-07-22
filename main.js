@@ -15,7 +15,7 @@ window.addEventListener("resize", resizeCanvas, false);
 // ----- CANVAS ----- //
 
 
-// ----- IMAGES ----- //
+// ----- IMAGES AND BOXES ----- //
 let imgPaths = [
     // Common
     "data/images/common/background.png",
@@ -62,24 +62,55 @@ let imgAliases = [
 ];
 let images = [];  // Container of only images
 
-// OPTIMIZE: Can remove overs?
-let boxSpecs = [  // Syntax: boxAlias (id), imgAlias (source1), imgAlias_over (source2), specs: (CORNERS: left, top, right, bottom; CENTER: x, y, w / h); Values: [0, 1]
+let boxSpecs = [  // Syntax: boxAlias (id), imgAlias (source1), imgAlias_over (source2), specs: (CORNERS: left, top, right, bottom; CENTER: x, y, w / h); Values: W[0, 160] / H[0, 90]
     // Common
-    ["common_bg",               "common_bg",            "common_bg",                "CORNERS", 0, 0, 1, 1],
+    ["common_bg",               "common_bg",            "common_bg",                "CORNERS",  0,      0,      160,    90],
 
     // Home
-    ["home_title",              "home_title",           "home_title",               "CENTER", 0.5, 0.2, "W", 0.5],
-    ["home_play",               "home_play",            "home_play_over",           "CENTER", 0.5, 0.5, "W", 0.2],
-    ["home_set",                "home_set",             "home_set_over",            "CENTER", 0.2, 0.8, "W", 0.2],
-    ["home_inv",                "home_inv",             "home_inv_over",            "CENTER", 0.5, 0.7, "W", 0.2],
+    ["home_title",              "home_title",           "home_title",               "CENTER",   80,     18,     "W",    80],
+    ["home_play",               "home_play",            "home_play_over",           "CENTER",   80,     45,     "W",    32],
+    ["home_set",                "home_set",             "home_set_over",            "CENTER",   32,     72,     "W",    32],
+    ["home_inv",                "home_inv",             "home_inv_over",            "CENTER",   80,     63,     "W",    32],
 
     // Levels
-    ["levels_title",            "levels_title",         "levels_title",             "CENTER", 0.5, 0.15, "W", 0.4],
-    ["levels_back",             "levels_back",          "levels_back_over",         "CENTER", 0.1, 0.9, "W", 0.15],
-    ["levels_level_1x1",        "levels_level",         "levels_level_over",        "CENTER", 0.1, 0.9, "W", 0.15],
-    ["levels_padlock_1x1",      "levels_padlock",       "levels_padlock_over",      "CENTER", 0.1, 0.9, "W", 0.15]
+    ["levels_title",            "levels_title",         "levels_title",             "CENTER",   80,     15,     "W",    64],
+    ["levels_back",             "levels_back",          "levels_back_over",         "CENTER",   16,     81,     "W",    24],
+    // #region Levels 1x1 to 4x4
+    // ["levels_level_1",          "levels_level",         "levels_level_over",        "CENTER",   0.2,    0.3,    "W",    0.1],
+    // ["levels_padlock_1",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.2,    0.3,    "W",    0.05],
+    // ["levels_level_2",          "levels_level",         "levels_level_over",        "CENTER",   0.8,    0.3,    "W",    0.1],
+    // ["levels_padlock_2",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.8,    0.3,    "W",    0.05],
+    // ["levels_level_3",          "levels_level",         "levels_level_over",        "CENTER",   0.2,    0.9,    "W",    0.1],
+    // ["levels_padlock_3",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.2,    0.9,    "W",    0.05],
+    // ["levels_level_4",          "levels_level",         "levels_level_over",        "CENTER",   0.8,    0.9,    "W",    0.1],
+    // ["levels_padlock_4",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.8,    0.9,    "W",    0.05],
+    // ["levels_level_5",          "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_5",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_6",          "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_6",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_7",          "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_7",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_8",          "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_8",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_9",          "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_9",        "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_10",         "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_10",       "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_11",         "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_11",       "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_12",         "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_12",       "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_13",         "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_13",       "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_14",         "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_14",       "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_15",         "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_15",       "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05],
+    // ["levels_level_16",         "levels_level",         "levels_level_over",        "CENTER",   0.1,    0.9,    "W",    0.1],
+    // ["levels_padlock_16",       "levels_padlock",       "levels_padlock_over",      "CENTER",   0.1,    0.9,    "W",    0.05]
+    // #endregion
 ];
-let boxes = [];  // Container of only boxes
+let boxes = [];  // Container of boxes with refs to images
 
 let loadedImages = 0;
 document.addEventListener("DOMContentLoaded", function() {
@@ -105,24 +136,24 @@ function boxImages() {
         boxes[boxSpecs[i][0]] = [];
 
         if(boxSpecs[i][3] == "CORNERS") {
-            boxes[boxSpecs[i][0]]["left"] = gWIDTH * boxSpecs[i][4];
-            boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5];
-            boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][6];
-            boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][7];
+            boxes[boxSpecs[i][0]]["left"] = gWIDTH * boxSpecs[i][4] / 160;
+            boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] / 90;
+            boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][6] / 160;
+            boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][7] / 90;
         } else if(boxSpecs[i][3] == "CENTER") {
             let W, H;
             if(boxSpecs[i][6] == "W") {
-                W = gWIDTH * boxSpecs[i][7];
+                W = gWIDTH * boxSpecs[i][7] / 160;
                 H = W * images[boxSpecs[i][1]].height / images[boxSpecs[i][1]].width;
             } else {
-                H = gHEIGHT * boxSpecs[i][7];
+                H = gHEIGHT * boxSpecs[i][7] / 90;
                 W = H * images[boxSpecs[i][1]].width / images[boxSpecs[i][1]].height;
             }
 
-            boxes[boxSpecs[i][0]]["left"] = gWIDTH * boxSpecs[i][4] - 0.5 * W;
-            boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] - 0.5 * H;
-            boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][4] + 0.5 * W;
-            boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][5] + 0.5 * H;
+            boxes[boxSpecs[i][0]]["left"] = gWIDTH * boxSpecs[i][4] / 160 - 0.5 * W;
+            boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] / 90 - 0.5 * H;
+            boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][4] / 160 + 0.5 * W;
+            boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][5] / 90 + 0.5 * H;
         }
 
         boxes[boxSpecs[i][0]]["width"] = boxes[boxSpecs[i][0]]["right"] - boxes[boxSpecs[i][0]]["left"];
@@ -132,7 +163,7 @@ function boxImages() {
         boxes[boxSpecs[i][0]]["image_over"] = boxSpecs[i][2];
     }
 }
-// ----- IMAGES ----- //
+// ----- IMAGES AND BOXES ----- //
 
 
 // ----- MOUSE ----- //
@@ -251,6 +282,7 @@ function drawBox(box) {
     );
 }
 
+
 function draw() {
     game.fillStyle = "rgb(200, 250, 250)";
     game.fillRect(0, 0, gWIDTH, gHEIGHT);
@@ -268,6 +300,10 @@ function draw() {
             drawBox("common_bg");
             drawBox("levels_title");
             drawBox("levels_back");
+            // drawBox("levels_level_1");
+            // drawBox("levels_level_2");
+            // drawBox("levels_level_3");
+            // drawBox("levels_level_4");
             break;
     }
 
