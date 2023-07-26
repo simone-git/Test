@@ -140,6 +140,9 @@ function boxImages() {
             boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] / 90;
             boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][6] / 160;
             boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][7] / 90;
+            
+            boxes[boxSpecs[i][0]]["center_x"] = (boxes[boxSpecs[i][0]]["left"] + boxes[boxSpecs[i][0]]["right"]) / 2;
+            boxes[boxSpecs[i][0]]["center_y"] = (boxes[boxSpecs[i][0]]["top"] + boxes[boxSpecs[i][0]]["bottom"]) / 2;
         } else if(boxSpecs[i][3] == "CENTER") {
             let W, H;
             if(boxSpecs[i][6] == "W") {
@@ -154,6 +157,9 @@ function boxImages() {
             boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] / 90 - 0.5 * H;
             boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][4] / 160 + 0.5 * W;
             boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][5] / 90 + 0.5 * H;
+
+            boxes[boxSpecs[i][0]]["center_x"] = gWIDTH * boxSpecs[i][4] / 160;
+            boxes[boxSpecs[i][0]]["center_y"] = gHEIGHT * boxSpecs[i][5] / 90;
         }
 
         boxes[boxSpecs[i][0]]["width"] = boxes[boxSpecs[i][0]]["right"] - boxes[boxSpecs[i][0]]["left"];
@@ -164,6 +170,12 @@ function boxImages() {
     }
 }
 // ----- IMAGES AND BOXES ----- //
+
+// ----- FONTS ----- //
+let fonts = [];
+
+//fonts["levels_level"] = new FontFace("Library", "data/fonts/Library 3 am");
+// ----- FONTS ----- //
 
 
 // ----- MOUSE ----- //
@@ -300,9 +312,17 @@ function draw() {
             drawBox("common_bg");
             drawBox("levels_title");
             drawBox("levels_back");
+
+            game.fillStyle = "white";
+            game.font = "" + Math.round(gWIDTH * 13 / 160 * 0.6) + "px Library";
+            game.textAlign = "center";
+            game.textBaseline = "middle";
             for(let i = 1; i <= 16; i++) {
                 drawBox("levels_level_" + i);
+                game.fillText(i, boxes["levels_level_" + i].center_x, boxes["levels_level_" + i].center_y);
+                game.globalAlpha = 0.85;
                 drawBox("levels_padlock_" + i);
+                game.globalAlpha = 1;
             }
             break;
     }
