@@ -1,18 +1,26 @@
 // ----- CANVAS ----- //
 let canvas = document.getElementById("game");
 let game = canvas.getContext("2d")
-let scene = "home";
+
+let sceneInfo = [];
+sceneInfo["scene"] = "home";
+
 let prevTime = 0, fps = 0;
 
 /*let frameCanvas = document.createElement("canvas");  // Can also use OffscreenCanvas
 frameCanvas.setAttribute("id", "frame");
 let frame = frameCanvas.getContext("2d");*/
 
-let gWIDTH, gHEIGHT, fWIDTH = 32, fHEIGHT = 18, ratio = 16 / 9;
+let gWIDTH, gHEIGHT, ratio = 16 / 9;
 
 resizeCanvas(false);
 window.addEventListener("resize", resizeCanvas, false);
 // ----- CANVAS ----- //
+
+
+// ----- LEVELS ----- //
+let levels = [];
+levels[0] = { "": [] };
 
 
 // ----- IMAGES AND BOXES ----- //
@@ -140,6 +148,9 @@ function boxImages() {
             boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] / 90;
             boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][6] / 160;
             boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][7] / 90;
+            
+            boxes[boxSpecs[i][0]]["center_x"] = (boxes[boxSpecs[i][0]]["left"] + boxes[boxSpecs[i][0]]["right"]) / 2;
+            boxes[boxSpecs[i][0]]["center_y"] = (boxes[boxSpecs[i][0]]["top"] + boxes[boxSpecs[i][0]]["bottom"]) / 2;
         } else if(boxSpecs[i][3] == "CENTER") {
             let W, H;
             if(boxSpecs[i][6] == "W") {
@@ -154,6 +165,9 @@ function boxImages() {
             boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] / 90 - 0.5 * H;
             boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][4] / 160 + 0.5 * W;
             boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][5] / 90 + 0.5 * H;
+
+            boxes[boxSpecs[i][0]]["center_x"] = gWIDTH * boxSpecs[i][4] / 160;
+            boxes[boxSpecs[i][0]]["center_y"] = gHEIGHT * boxSpecs[i][5] / 90;
         }
 
         boxes[boxSpecs[i][0]]["width"] = boxes[boxSpecs[i][0]]["right"] - boxes[boxSpecs[i][0]]["left"];
@@ -164,6 +178,12 @@ function boxImages() {
     }
 }
 // ----- IMAGES AND BOXES ----- //
+
+// ----- FONTS ----- //
+let fonts = [];
+
+//fonts["levels_level"] = new FontFace("Library", "data/fonts/Library 3 am");
+// ----- FONTS ----- //
 
 
 // ----- MOUSE ----- //
@@ -205,7 +225,7 @@ document.addEventListener("mousedown", mouseEvent);
 let keyboardInfo = [];
 
 function keyboardEvent(event) {
-    keyboardInfo[event.key] = (event.type == "keydown");
+    keyboardInfo[event.key.toUpperCase()] = (event.type == "keydown");
 }
 
 document.addEventListener("keydown", keyboardEvent);
@@ -252,23 +272,48 @@ function mouseTestBox(box) {
     return boxes[box] != undefined && x >= boxes[box].left && x <= boxes[box].right && y >= boxes[box].top && y <= boxes[box].bottom;
 }
 
-
+// TODO: Fully manage keyboard inputs and add keyboard menu navigation
 function update() {
-    if(mouseInfo["clicked"] == true) {
-        switch (scene) {
-            case "home":
-                if(mouseTestBox("home_play")) scene = "levels";
+    switch (sceneInfo["scene"]) {
+        case "home":
+            if(mouseInfo["clicked"] == true) {
+                if(mouseTestBox("home_play")) {
+                    sceneInfo = [];
+                    sceneInfo["scene"] = "levels";
+                }
+
                 // if(mouseTestBox("home_set")) scene = "settings";
                 // if(mouseTestBox("home_inv")) scene = "inventory";
-                break;
+            }
+            break;
+    
+        case "levels":
+            if(mouseInfo["clicked"] == true) {
+                if(mouseTestBox("levels_back")) {
+                    sceneInfo = [];
+                    sceneInfo["scene"] = "home";
+                }
+
+                for(let i = 1; i <= 16; i++) {
+                    if(mouseTestBox("levels_level_" + i)) {
+                        sceneInfo = [];
+                        sceneInfo["scene"] = "play";
+                        sceneInfo["level"] = i;
+                    }
+                }
+            }
+            break;
         
-            case "levels":
-                if(mouseTestBox("levels_back")) scene = "home";
-                break;
-        }
+        case "play":
+            if(keyboardInfo["A"] == true) {
+                sceneInfo = [];
+                sceneInfo["scene"] = "levels";
+            }
+            break;
     }
 
     mouseInfo["clicked"] = false;
+    keyboardInfo = [];  // TODO: look before update() and reset after each scene change
 }
 
 
@@ -282,12 +327,11 @@ function drawBox(box) {
     );
 }
 
-
 function draw() {
     game.fillStyle = "rgb(200, 250, 250)";
     game.fillRect(0, 0, gWIDTH, gHEIGHT);
 
-    switch (scene) {
+    switch (sceneInfo["scene"]) {
         case "home":
             drawBox("common_bg");
             drawBox("home_title");
@@ -300,11 +344,22 @@ function draw() {
             drawBox("common_bg");
             drawBox("levels_title");
             drawBox("levels_back");
+
+            game.fillStyle = "white";
+            game.font = "" + Math.round(gWIDTH * 13 / 160 * 0.6) + "px Library";
+            game.textAlign = "center";
+            game.textBaseline = "middle";
             for(let i = 1; i <= 16; i++) {
                 drawBox("levels_level_" + i);
+                game.fillText(i, boxes["levels_level_" + i].center_x, boxes["levels_level_" + i].center_y);
+                game.globalAlpha = 0.85;
                 drawBox("levels_padlock_" + i);
+                game.globalAlpha = 1;
             }
             break;
+
+        case "play":
+            drawBox("common_bg");
     }
 
     game.fillStyle = "black";
