@@ -1,17 +1,16 @@
 // ----- CANVAS ----- //
+// #region Canvas
 let canvas = document.getElementById("game");
-let game = canvas.getContext("2d")
+let game = canvas.getContext("2d");
+
+//let dd = new Drawer();
 
 let sceneInfo = [];
 sceneInfo["scene"] = "home";
 
 let prevTime = 0, fps = 0;
 
-// let frameCanvas = document.createElement("canvas");  // Can also use OffscreenCanvas
-// frameCanvas.setAttribute("id", "frame");
-// let frame = frameCanvas.getContext("2d");
-
-let gWIDTH, gHEIGHT, ratio = 16 / 9;
+let pxWidth, pxHeight, ratio = 16 / 9;
 
 resizeCanvas(false);
 window.addEventListener("resize", resizeCanvas, false);
@@ -19,31 +18,27 @@ window.addEventListener("resize", resizeCanvas, false);
 
 function resizeCanvas(boxImgs = true) {
     if(window.innerWidth / window.innerHeight >= ratio) {
-        gWIDTH = Math.round(window.innerHeight * ratio);
-        gHEIGHT = window.innerHeight;
-        canvas.width = gWIDTH;
-        canvas.height = gHEIGHT;
+        pxWidth = Math.round(window.innerHeight * ratio);
+        pxHeight = window.innerHeight;
+        canvas.width = pxWidth;
+        canvas.height = pxHeight;
     } else {
-        gWIDTH = window.innerWidth;
-        gHEIGHT = Math.round(window.innerWidth / ratio);
-        canvas.width = gWIDTH;
-        canvas.height = gHEIGHT;
+        pxWidth = window.innerWidth;
+        pxHeight = Math.round(window.innerWidth / ratio);
+        canvas.width = pxWidth;
+        canvas.height = pxHeight;
     }
 
     if(boxImgs) {
         boxImages();
     }
 }
+// #endregion
 // ----- CANVAS ----- //
 
 
-// ----- LEVELS ----- //
-let levels = [];
-levels[0] = { "": [] };
-// ----- LEVELS ----- //
-
-
 // ----- IMAGES AND BOXES ----- //
+// #region Images and boxes
 let loadedImages = 0;
 document.addEventListener("DOMContentLoaded", function() {
     for(let i = 0; i < imgPaths.length; i++) {
@@ -68,30 +63,30 @@ function boxImages() {
         boxes[boxSpecs[i][0]] = [];
 
         if(boxSpecs[i][3] == "CORNERS") {
-            boxes[boxSpecs[i][0]]["left"] = gWIDTH * boxSpecs[i][4] / 160;
-            boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] / 90;
-            boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][6] / 160;
-            boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][7] / 90;
+            boxes[boxSpecs[i][0]]["left"] = pxWidth * boxSpecs[i][4] / fixedWidth;
+            boxes[boxSpecs[i][0]]["top"] = pxHeight * boxSpecs[i][5] / fixedHeight;
+            boxes[boxSpecs[i][0]]["right"] = pxWidth * boxSpecs[i][6] / fixedWidth;
+            boxes[boxSpecs[i][0]]["bottom"] = pxHeight * boxSpecs[i][7] / fixedHeight;
             
             boxes[boxSpecs[i][0]]["center_x"] = (boxes[boxSpecs[i][0]]["left"] + boxes[boxSpecs[i][0]]["right"]) / 2;
             boxes[boxSpecs[i][0]]["center_y"] = (boxes[boxSpecs[i][0]]["top"] + boxes[boxSpecs[i][0]]["bottom"]) / 2;
         } else if(boxSpecs[i][3] == "CENTER") {
             let W, H;
             if(boxSpecs[i][6] == "W") {
-                W = gWIDTH * boxSpecs[i][7] / 160;
+                W = pxWidth * boxSpecs[i][7] / fixedWidth;
                 H = W * images[boxSpecs[i][1]].height / images[boxSpecs[i][1]].width;
             } else {
-                H = gHEIGHT * boxSpecs[i][7] / 90;
+                H = pxHeight * boxSpecs[i][7] / fixedHeight;
                 W = H * images[boxSpecs[i][1]].width / images[boxSpecs[i][1]].height;
             }
 
-            boxes[boxSpecs[i][0]]["left"] = gWIDTH * boxSpecs[i][4] / 160 - 0.5 * W;
-            boxes[boxSpecs[i][0]]["top"] = gHEIGHT * boxSpecs[i][5] / 90 - 0.5 * H;
-            boxes[boxSpecs[i][0]]["right"] = gWIDTH * boxSpecs[i][4] / 160 + 0.5 * W;
-            boxes[boxSpecs[i][0]]["bottom"] = gHEIGHT * boxSpecs[i][5] / 90 + 0.5 * H;
+            boxes[boxSpecs[i][0]]["left"] = pxWidth * boxSpecs[i][4] / fixedWidth - 0.5 * W;
+            boxes[boxSpecs[i][0]]["top"] = pxHeight * boxSpecs[i][5] / fixedHeight - 0.5 * H;
+            boxes[boxSpecs[i][0]]["right"] = pxWidth * boxSpecs[i][4] / fixedWidth + 0.5 * W;
+            boxes[boxSpecs[i][0]]["bottom"] = pxHeight * boxSpecs[i][5] / fixedHeight + 0.5 * H;
 
-            boxes[boxSpecs[i][0]]["center_x"] = gWIDTH * boxSpecs[i][4] / 160;
-            boxes[boxSpecs[i][0]]["center_y"] = gHEIGHT * boxSpecs[i][5] / 90;
+            boxes[boxSpecs[i][0]]["center_x"] = pxWidth * boxSpecs[i][4] / fixedWidth;
+            boxes[boxSpecs[i][0]]["center_y"] = pxHeight * boxSpecs[i][5] / fixedHeight;
         }
 
         boxes[boxSpecs[i][0]]["width"] = boxes[boxSpecs[i][0]]["right"] - boxes[boxSpecs[i][0]]["left"];
@@ -101,10 +96,30 @@ function boxImages() {
         boxes[boxSpecs[i][0]]["image_over"] = boxSpecs[i][2];
     }
 }
+
+function drawBox(box) {
+    game.drawImage(
+        mouseTestBox(box) ? images[boxes[box].image_over] : images[boxes[box].image],
+        boxes[box].left,
+        boxes[box].top,
+        boxes[box].width,
+        boxes[box].height
+    );
+}
+//#endregion
 // ----- IMAGES AND BOXES ----- //
 
 
+// ----- LEVELS ----- //
+// #region Levels
+let levels = [];
+levels[0] = { "": [] };
+//#endregion
+// ----- LEVELS ----- //
+
+
 // ----- MOUSE ----- //
+// #region Mouse
 let mouseInfo = [];
 mouseInfo["x"] = 0;
 mouseInfo["y"] = 0;
@@ -144,10 +159,12 @@ function mouseTestBox(box) {
 
     return boxes[box] != undefined && x >= boxes[box].left && x <= boxes[box].right && y >= boxes[box].top && y <= boxes[box].bottom;
 }
+// #endregion
 // ----- MOUSE ----- //
 
 
 // ----- KEYBOARD ----- //
+// #region Keyboard
 let keyboardInfo = [];
 
 function keyboardEvent(event) {
@@ -156,9 +173,12 @@ function keyboardEvent(event) {
 
 document.addEventListener("keydown", keyboardEvent);
 document.addEventListener("keyup", keyboardEvent);
+// #endregion
 // ----- KEYBOARD ----- //
 
 
+// ----- GAME LOOP ----- //
+// #region Game Loop
 function gameLoop(timeStamp) {
     var deltaTime = timeStamp - prevTime;
     prevTime = timeStamp;
@@ -181,8 +201,8 @@ function update() {
                     sceneInfo["scene"] = "levels";
                 }
 
-                // if(mouseTestBox("home_set")) scene = "settings";
-                // if(mouseTestBox("home_inv")) scene = "inventory";
+                // else if(mouseTestBox("home_set")) scene = "settings";
+                // else if(mouseTestBox("home_inv")) scene = "inventory";
             }
             break;
     
@@ -215,20 +235,9 @@ function update() {
     keyboardInfo = [];  // TODO: look before update() and reset after each scene change
 }
 
-
-function drawBox(box) {
-    game.drawImage(
-        mouseTestBox(box) ? images[boxes[box].image_over] : images[boxes[box].image],
-        boxes[box].left,
-        boxes[box].top,
-        boxes[box].width,
-        boxes[box].height
-    );
-}
-
 function draw() {
     game.fillStyle = "rgb(200, 250, 250)";
-    game.fillRect(0, 0, gWIDTH, gHEIGHT);
+    game.fillRect(0, 0, pxWidth, pxHeight);
 
     switch (sceneInfo["scene"]) {
         case "home":
@@ -245,12 +254,13 @@ function draw() {
             drawBox("levels_back");
 
             game.fillStyle = "white";
-            game.font = "" + Math.round(gWIDTH * 13 / 160 * 0.6) + "px Library";
+            game.font = "" + Math.round(pxWidth * 13 / fixedWidth * 0.6) + "px Library";
             game.textAlign = "center";
             game.textBaseline = "middle";
             for(let i = 1; i <= 16; i++) {
+                let i7 = i >= 7 ? i + 1 : i;
                 drawBox("levels_level_" + i);
-                game.fillText(i, boxes["levels_level_" + i].center_x, boxes["levels_level_" + i].center_y);
+                game.fillText(i7, boxes["levels_level_" + i].center_x, boxes["levels_level_" + i].center_y);
                 game.globalAlpha = 0.85;
                 drawBox("levels_padlock_" + i);
                 game.globalAlpha = 1;
@@ -266,7 +276,10 @@ function draw() {
     game.textAlign = "start";
     game.textBaseline = "top";
     let text = "FPS: " + fps + " / " +
-        gWIDTH + " x " + gHEIGHT + " / " + 
-        "MOUSE: (" + (mouseInfo["x"] / gWIDTH * 160) + ", " + (mouseInfo["y"] / gHEIGHT * 90) + ")";
+        pxWidth + " x " + pxHeight + " / " + 
+        "MOUSE: (" + (mouseInfo["x"]) + ", " + (mouseInfo["y"]) + ") " + 
+        "fixed (" + (mouseInfo["x"] / pxWidth * fixedWidth) + ", " + (mouseInfo["y"] / pxHeight * fixedHeight) + ")";
     game.fillText(text, 8, 4);
 }
+// #endregion
+// ----- GAME LOOP ----- //
