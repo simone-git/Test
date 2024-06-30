@@ -3,8 +3,6 @@
 let canvas = document.getElementById("game");
 let game = canvas.getContext("2d");
 
-//let dd = new Drawer();
-
 let sceneInfo = [];
 sceneInfo["scene"] = "home";
 
